@@ -93,6 +93,24 @@ def build_graph(nodes):
     return gr
 
 
+def extract_keywords(text):
+    """Extract keywords."""
+    tokens = nltk.word_tokenize(text)
+
+    tagged = nltk.pos_tag(tokens)
+    tagged = normalize(filter_for_tags(tagged))
+
+    unique_word_set = unique_everseen([x[0] for x in tagged])
+    word_set_list = list(unique_word_set)
+    graph = build_graph(word_set_list)
+
+    return {
+        'pagerank': nx.pagerank(graph, weight='weight'),
+        'tokens': tokens,
+        'vertices': len(word_set_list)
+    }
+
+
 def extract_key_phrases(text):
     """Return a set of key phrases.
 
