@@ -93,24 +93,6 @@ def build_graph(nodes):
     return gr
 
 
-def extract_keywords(text):
-    """Extract keywords."""
-    tokens = nltk.word_tokenize(text)
-
-    tagged = nltk.pos_tag(tokens)
-    tagged = normalize(filter_for_tags(tagged))
-
-    unique_word_set = unique_everseen([x[0] for x in tagged])
-    word_set_list = list(unique_word_set)
-    graph = build_graph(word_set_list)
-
-    return {
-        'pagerank': nx.pagerank(graph, weight='weight'),
-        'tokens': tokens,
-        'vertices': len(word_set_list)
-    }
-
-
 def extract_key_phrases(text):
     """Return a set of key phrases.
 
@@ -159,19 +141,21 @@ def extract_key_phrases(text):
         first = textlist[i]
         second = textlist[j]
         if first in keyphrases and second in keyphrases:
-            keyphrase = first + ' ' + second
-            modified_key_phrases.add(keyphrase)
+            keyphrase = '{} {}'.format(first, second)
+            score = calculated_page_rank[first] + calculated_page_rank[second]
+            modified_key_phrases.add((keyphrase, score))
             dealt_with.add(first)
             dealt_with.add(second)
         else:
             if first in keyphrases and first not in dealt_with:
-                modified_key_phrases.add(first)
+                modified_key_phrases.add((first, calculated_page_rank[first]))
 
             # if this is the last word in the text, and it is a keyword, it
             # definitely has no chance of being a keyphrase at this point
             if j == len(textlist) - 1 and second in keyphrases and \
                     second not in dealt_with:
-                modified_key_phrases.add(second)
+                modified_key_phrases.add(
+                    (second, calculated_page_rank[second]))
 
         i = i + 1
         j = j + 1
