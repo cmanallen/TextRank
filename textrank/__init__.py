@@ -131,7 +131,7 @@ def extract_key_phrases(text):
     # take keyphrases with multiple words into consideration as done in the
     # paper - if two words are adjacent in the text and are selected as
     # keywords, join them together
-    modified_key_phrases = set([])
+    modified_key_phrases = {}
     # keeps track of individual keywords that have been joined to form a
     # keyphrase
     dealt_with = set([])
@@ -143,19 +143,18 @@ def extract_key_phrases(text):
         if first in keyphrases and second in keyphrases:
             keyphrase = '{} {}'.format(first, second)
             score = calculated_page_rank[first] + calculated_page_rank[second]
-            modified_key_phrases.add((keyphrase, score))
+            modified_key_phrases[keyphrase] = score
             dealt_with.add(first)
             dealt_with.add(second)
         else:
             if first in keyphrases and first not in dealt_with:
-                modified_key_phrases.add((first, calculated_page_rank[first]))
+                modified_key_phrases[first] = calculated_page_rank[first]
 
             # if this is the last word in the text, and it is a keyword, it
             # definitely has no chance of being a keyphrase at this point
             if j == len(textlist) - 1 and second in keyphrases and \
                     second not in dealt_with:
-                modified_key_phrases.add(
-                    (second, calculated_page_rank[second]))
+                modified_key_phrases[second] = calculated_page_rank[second]
 
         i = i + 1
         j = j + 1
